@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYP 유전형 분석</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #F5F1E8;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .header-bar {
+            background: #2C3E50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-bar .logo {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .header-bar .logo .orange {
+            color: #D67D3E;
+        }
+
+        .header-bar .tag {
+            font-size: 0.75em;
+            color: #95A5A6;
+            text-transform: uppercase;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .page-title {
+            font-size: 2em;
+            color: #2C3E50;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #D67D3E;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #2C3E50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            padding-left: 15px;
+            border-left: 4px solid #D67D3E;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1.5px solid #D4C5B0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            background: white;
+            color: #333;
+            transition: all 0.25s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23D67D3E' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 38px;
+            cursor: pointer;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #D67D3E;
+            box-shadow: 0 0 0 3px rgba(214, 125, 62, 0.15);
+        }
+
+        .form-group select:disabled {
+            background-color: #F8F6F2;
+            cursor: not-allowed;
+            opacity: 0.65;
+            color: #999;
+        }
+
+        .allele-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #D67D3E;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #C56A2A;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(214, 125, 62, 0.3);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 결과 섹션 */
+        .result-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-box {
+            background: #EDE4D3;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .result-box h3 {
+            font-size: 1.2em;
+            color: #2C3E50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            padding-left: 15px;
+            border-left: 4px solid #D67D3E;
+        }
+
+        .phenotype-card {
+            background: #2C3E50;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .phenotype-label {
+            font-size: 0.8em;
+            color: #95A5A6;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .phenotype-value {
+            font-size: 1.8em;
+            color: #D67D3E;
+            font-weight: 700;
+        }
+
+        .implication-label {
+            font-size: 0.8em;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .implication-box {
+            background: #F5F1E8;
+            border-left: 4px solid #D67D3E;
+            padding: 18px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .freq-section {
+            background: #EDE4D3;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .freq-section h3 {
+            font-size: 1.2em;
+            color: #2C3E50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            padding-left: 15px;
+            border-left: 4px solid #D67D3E;
+        }
+
+        .freq-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .chart-container {
+            text-align: center;
+        }
+
+        .chart-label-text {
+            font-size: 0.9em;
+            color: #2C3E50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .circular-chart {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 15px;
+            position: relative;
+        }
+
+        .circular-chart svg {
+            transform: rotate(-90deg);
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: #E8E0D0;
+            stroke-width: 15;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke-width: 15;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .chart-percent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .chart-legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: #555;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* 약물 테이블 */
+        .drug-section {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .drug-section h3 {
+            font-size: 1.3em;
+            color: #2C3E50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            padding-left: 15px;
+            border-left: 4px solid #D67D3E;
+        }
+
+        .drug-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .drug-table thead {
+            background: linear-gradient(135deg, #7B68EE 0%, #9370DB 100%);
+        }
+
+        .drug-table th {
+            color: white;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .drug-table th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        .drug-table th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        .drug-table tbody tr {
+            border-bottom: 1px solid #E8E0D0;
+        }
+
+        .drug-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .drug-table td {
+            padding: 18px 20px;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .drug-table .ingredient-name {
+            font-weight: 600;
+            color: #2C3E50;
+        }
+
+        .drug-table .korean-drugs {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .more-link {
+            color: #7B68EE;
+            text-decoration: none;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .more-link:hover {
+            text-decoration: underline;
+        }
+
+        .more-btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .more-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: white;
+            color: #7B68EE;
+            border: 2px solid #7B68EE;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-decoration: none;
+        }
+
+        .more-btn:hover {
+            background: #7B68EE;
+            color: white;
+        }
+
+        .error {
+            background: #FEE;
+            color: #C33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #C33;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .freq-charts {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .allele-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <div class="logo">
+            <span class="orange">CYP</span><span>.0R1</span>
+        </div>
+        <div class="tag">#PHARMACOGENOMICS</div>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">CYP.0R1</h1>
+
+        <!-- 입력 섹션 -->
+        <div class="section-card">
+            <h2 class="section-title">유전형 분석</h2>
+
+            <div class="form-group">
+                <label for="geneSelect">유전자</label>
+                <select id="geneSelect">
+                    <option value="">값을 선택하세요</option>
+                </select>
+            </div>
+
+            <div class="allele-row">
+                <div class="form-group">
+                    <label for="allele1Select">대립 유전자 1</label>
+                    <select id="allele1Select" disabled>
+                        <option value="">유전자를 먼저 선택하세요</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="allele2Select">대립 유전자 2</label>
+                    <select id="allele2Select" disabled>
+                        <option value="">유전자를 먼저 선택하세요</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="confirmBtn" class="btn-primary" disabled>확인</button>
+        </div>
+
+        <!-- 결과 섹션 -->
+        <div id="resultSection" class="result-section">
+            <div id="errorMsg" class="error" style="display:none;"></div>
+
+            <div class="result-box">
+                <h3>결과</h3>
+
+                <div class="phenotype-card">
+                    <div class="phenotype-label">PHENOTYPE</div>
+                    <div class="phenotype-value" id="phenotypeName">-</div>
+                </div>
+
+                <div class="implication-label">IMPLICATION</div>
+                <div class="implication-box" id="implication">-</div>
+            </div>
+
+            <div class="freq-section">
+                <h3>비율을 확인해보세요!</h3>
+
+                <div class="freq-charts">
+                    <div class="chart-container">
+                        <div class="chart-label-text">동아시아 빈도</div>
+                        <div class="circular-chart">
+                            <svg viewBox="0 0 180 180">
+                                <circle class="circle-bg" cx="90" cy="90" r="70"></circle>
+                                <circle id="eastAsianCircle" class="circle-progress" cx="90" cy="90" r="70" 
+                                        stroke="#D67D3E" stroke-dasharray="439.6" stroke-dashoffset="439.6"></circle>
+                            </svg>
+                            <div class="chart-percent" id="eastAsianLabel" style="color: #D67D3E;">-%</div>
+                        </div>
+                        <div class="chart-legend">
+                            <span class="legend-dot" style="background: #D67D3E;"></span>
+                            <span>동아시아 빈도</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-label-text">유럽 빈도</div>
+                        <div class="circular-chart">
+                            <svg viewBox="0 0 180 180">
+                                <circle class="circle-bg" cx="90" cy="90" r="70"></circle>
+                                <circle id="europeanCircle" class="circle-progress" cx="90" cy="90" r="70" 
+                                        stroke="#2C3E50" stroke-dasharray="439.6" stroke-dashoffset="439.6"></circle>
+                            </svg>
+                            <div class="chart-percent" id="europeanLabel" style="color: #2C3E50;">-%</div>
+                        </div>
+                        <div class="chart-legend">
+                            <span class="legend-dot" style="background: #2C3E50;"></span>
+                            <span>유럽 빈도</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drug-section">
+                <h3>관련 약물</h3>
+                <div id="drugTableContainer"></div>
+                <div class="more-btn-container">
+                    <a id="moreBtn" href="#" target="_blank" class="more-btn" style="display:none;">+ 더보기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://cyp0r1.onrender.com';
+        let currentGeneSymbol = '';
+
+        window.addEventListener('DOMContentLoaded', loadGenes);
+
+        async function loadGenes() {
+            try {
+                const response = await fetch(`${API_BASE}/genes`);
+                const genes = await response.json();
+
+                const geneSelect = document.getElementById('geneSelect');
+                genes.forEach(gene => {
+                    const option = document.createElement('option');
+                    option.value = gene.gene_symbol;
+                    option.textContent = gene.gene_symbol;
+                    geneSelect.appendChild(option);
+                });
+
+                geneSelect.addEventListener('change', handleGeneChange);
+            } catch (error) {
+                console.error('유전자 목록 로딩 실패:', error);
+                alert('유전자 목록을 불러오는데 실패했습니다.');
+            }
+        }
+
+        async function handleGeneChange(e) {
+            const geneSymbol = e.target.value;
+            currentGeneSymbol = geneSymbol;
+
+            const allele1Select = document.getElementById('allele1Select');
+            const allele2Select = document.getElementById('allele2Select');
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            if (!geneSymbol) {
+                allele1Select.disabled = true;
+                allele2Select.disabled = true;
+                confirmBtn.disabled = true;
+                allele1Select.innerHTML = '<option value="">유전자를 먼저 선택하세요</option>';
+                allele2Select.innerHTML = '<option value="">유전자를 먼저 선택하세요</option>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/genes/${geneSymbol}/alleles`);
+                const alleles = await response.json();
+
+                allele1Select.innerHTML = '<option value="">선택하세요</option>';
+                allele2Select.innerHTML = '<option value="">선택하세요</option>';
+
+                alleles.forEach(allele => {
+                    const option1 = document.createElement('option');
+                    option1.value = allele.allele_name;
+                    option1.textContent = allele.allele_name;
+                    allele1Select.appendChild(option1);
+
+                    const option2 = document.createElement('option');
+                    option2.value = allele.allele_name;
+                    option2.textContent = allele.allele_name;
+                    allele2Select.appendChild(option2);
+                });
+
+                allele1Select.disabled = false;
+                allele2Select.disabled = false;
+
+                allele1Select.addEventListener('change', checkFormComplete);
+                allele2Select.addEventListener('change', checkFormComplete);
+            } catch (error) {
+                console.error('Allele 목록 로딩 실패:', error);
+                alert('Allele 목록을 불러오는데 실패했습니다.');
+            }
+        }
+
+        function checkFormComplete() {
+            const allele1 = document.getElementById('allele1Select').value;
+            const allele2 = document.getElementById('allele2Select').value;
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            confirmBtn.disabled = !(allele1 && allele2);
+        }
+
+        document.getElementById('confirmBtn').addEventListener('click', analyzePhenotype);
+
+        async function analyzePhenotype() {
+            const geneSymbol = document.getElementById('geneSelect').value;
+            const allele1 = document.getElementById('allele1Select').value;
+            const allele2 = document.getElementById('allele2Select').value;
+
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '분석 중...';
+
+            try {
+                const phenoResponse = await fetch(`${API_BASE}/phenotype/calculate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        gene_symbol: geneSymbol,
+                        allele1: allele1,
+                        allele2: allele2
+                    })
+                });
+
+                if (!phenoResponse.ok) {
+                    const errorData = await phenoResponse.json();
+                    throw new Error(errorData.detail || 'Phenotype 분석 실패');
+                }
+
+                const phenoData = await phenoResponse.json();
+
+                const drugResponse = await fetch(`${API_BASE}/genes/${geneSymbol}/top-ingredients`);
+                const drugData = await drugResponse.json();
+
+                displayResults(phenoData, drugData);
+
+            } catch (error) {
+                console.error('분석 실패:', error);
+                document.getElementById('errorMsg').textContent = '분석 중 오류가 발생했습니다: ' + error.message;
+                document.getElementById('errorMsg').style.display = 'block';
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '확인';
+            }
+        }
+
+        function displayResults(phenoData, drugData) {
+            document.getElementById('resultSection').classList.add('active');
+            document.getElementById('errorMsg').style.display = 'none';
+
+            document.getElementById('phenotypeName').textContent = phenoData.phenotype || '-';
+            document.getElementById('implication').textContent = phenoData.pheno_implication || '-';
+
+            const eastasianFreq = parseFloat(phenoData.eastasian_freq) || 0;
+            const europeanFreq = parseFloat(phenoData.european_freq) || 0;
+
+            updateCircularChart('eastAsianCircle', 'eastAsianLabel', eastasianFreq);
+            updateCircularChart('europeanCircle', 'europeanLabel', europeanFreq);
+
+            displayDrugTable(drugData);
+
+            document.getElementById('confirmBtn').disabled = false;
+            document.getElementById('confirmBtn').textContent = '확인';
+
+            setTimeout(() => {
+                document.getElementById('resultSection').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 200);
+        }
+
+        function updateCircularChart(circleId, labelId, percentage) {
+            const circle = document.getElementById(circleId);
+            const label = document.getElementById(labelId);
+
+            const circumference = 439.6;
+            const offset = circumference - (circumference * percentage / 100);
+
+            setTimeout(() => {
+                circle.style.strokeDashoffset = offset;
+                label.textContent = percentage.toFixed(1) + '%';
+            }, 100);
+        }
+
+        function displayDrugTable(data) {
+            const container = document.getElementById('drugTableContainer');
+            const moreBtn = document.getElementById('moreBtn');
+
+            let drugs = [];
+            let geneUrl = null;
+
+            // ✅ 새 API 응답 구조 처리
+            if (data.ingredients) {
+                drugs = data.ingredients;
+                geneUrl = data.gene_url;
+            } else if (Array.isArray(data)) {
+                // ✅ 기존 API 응답 구조 호환
+                drugs = data;
+            }
+
+            if (!drugs || drugs.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#999;">관련 약물 정보가 없습니다.</p>';
+                moreBtn.style.display = 'none';
+                return;
+            }
+
+            let tableHTML = `
+                <table class="drug-table">
+                    <thead>
+                        <tr>
+                            <th>성분명</th>
+                            <th>국내 의약품</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            drugs.forEach(drug => {
+                const moreLink = drug.drug_url ? 
+                    `<a href="${drug.drug_url}" target="_blank" class="more-link">+ 더보기</a>` : '';
+
+                const koreanDrugs = drug.korean_drugs || '정보 없음';
+
+                tableHTML += `
+                    <tr>
+                        <td class="ingredient-name">${drug.ingredient || '-'}</td>
+                        <td class="korean-drugs">${koreanDrugs}${moreLink}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+
+            // ✅ gene_url이 있으면 더보기 버튼 표시
+            if (geneUrl) {
+                moreBtn.href = geneUrl;
+                moreBtn.style.display = 'inline-block';
+            } else {
+                moreBtn.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
