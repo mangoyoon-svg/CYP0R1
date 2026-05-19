@@ -16,31 +16,90 @@
             background: #F5F1E8;
             min-height: 100vh;
             padding: 0;
+            padding-top: 64px;
         }
 
+        /* 헤더 바 레이아웃 */
         .header-bar {
-            background: #2C3E50;
-            color: white;
-            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 16px 48px;
+            background: #1e3a52;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 2px solid #e88f2a;
         }
 
-        .header-bar .logo {
-            font-size: 1.1em;
+        /* 로고 스타일 */
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo .orange {
+            color: #e88f2a;
+        }
+
+        /* 헤더 오른쪽 영역 */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* 소개 보기 버튼 */
+        .btn-intro {
+            background: #e88f2a;
+            color: white;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 6px;
             font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
-        .header-bar .logo .orange {
-            color: #D67D3E;
+        .btn-intro:hover {
+            background: #f2a84e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(232, 143, 42, 0.3); 
         }
 
-        .header-bar .tag {
-            font-size: 0.75em;
-            color: #95A5A6;
-            text-transform: uppercase;
+        /* 태그 스타일 */
+        .tag {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85em;
+            font-weight: 500;
+            letter-spacing: 0.05em;
         }
+
+        /* 반응형 - 모바일 */
+        @media (max-width: 768px) {
+            .header-bar {
+                padding: 12px 20px;
+            }
+    
+            .header-right {
+                gap: 12px;
+            }
+    
+            .tag {
+                display: none;
+            }
+    
+            .btn-intro {
+                padding: 8px 16px;
+                font-size: 0.85em;
+            }
+        }
+
 
         .container {
             max-width: 900px;
@@ -440,14 +499,12 @@
         <div class="logo">
             <span class="orange">CYP</span><span>.0R1</span>
         </div>
-        <div class="tag">#PHARMACOGENOMICS</div>
+        <div class="header-right">
+            <a href="./page2.html" class="btn-intro">소개 보기</a>
+            <span class="tag">#PHARMACOGENOMICS</span>
+        </div>
     </div>
 
-        <div class="nav-links">
-            <a href="./page2.html" style="color: white; text-decoration: none; font-weight: 500; font-size: 0.9em;">플랫폼 소개 보기</a>
-        </div>
-        <div class="tag">#PHARMACOGENOMICS</div>
-    </div>
     <div class="container">
         <h1 class="page-title">CYP.0R1</h1>
 
