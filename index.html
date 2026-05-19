@@ -1,767 +1,610 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYP 유전형 분석</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CYP.OR1 — Pharmacogenomics Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: #F5F1E8;
-            min-height: 100vh;
-            padding: 0;
-        }
+    :root {
+      --navy:     #1e3a52;
+      --navy-d:   #162e42;
+      --navy-l:   #254d6b;
+      --bg:       #f9f7f2;
+      --bg-warm:  #f2ede4;
+      --bg-card:  #ffffff;
+      --border:   #ddd8ce;
+      --accent:   #e88f2a;
+      --accent-d: #9b632d;
+      --accent-l: #f2a84e;
+      --text:     #1a2a36;
+      --muted:    #5a6e7a;
+      --light:    #8a9ba6;
+      --nav-h:    64px;
+    }
 
-        .header-bar {
-            background: #2C3E50;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    html { scroll-behavior: smooth; }
 
-        .header-bar .logo {
-            font-size: 1.1em;
-            font-weight: 600;
-        }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      line-height: 1.7;
+    }
 
-        .header-bar .logo .orange {
-            color: #D67D3E;
-        }
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      height: var(--nav-h);
+      background: rgba(30,58,82,0.97);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 56px;
+    }
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.2rem; font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 0.875rem; font-weight: 500;
+      transition: all .2s;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .nav-links a.active { color: var(--accent-l); background: rgba(232,143,42,.15); }
+    .nav-links a.btn-primary {
+      background: var(--accent);
+      color: #fff; font-weight: 600;
+      border-radius: 6px;
+    }
+    .nav-links a.btn-primary:hover { background: var(--accent-l); }
 
-        .header-bar .tag {
-            font-size: 0.75em;
-            color: #95A5A6;
-            text-transform: uppercase;
-        }
+    section { scroll-margin-top: calc(var(--nav-h) + 20px); }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+    /* ── HERO (navy bg) ── */
+    #hero {
+      min-height: 100vh;
+      background: var(--navy);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-h) + 60px) 24px 80px;
+      position: relative; overflow: hidden;
+    }
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 0%, rgba(232,143,42,.15) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 90% 90%, rgba(255,255,255,.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.73rem; font-weight: 600;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--accent-l);
+      border: 1px solid rgba(232,143,42,.4);
+      border-radius: 20px; padding: 6px 18px; margin-bottom: 32px;
+    }
+    #hero h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1; margin-bottom: 12px;
+    }
+    #hero h1 .cyp { color: var(--accent); }
+    #hero h1 .dot { color: rgba(255,255,255,.4); }
+    #hero h1 .or1 { color: #ffffff; }
+    .hero-sub {
+      font-size: 1.05rem; color: rgba(255,255,255,.65);
+      max-width: 560px; margin: 0 auto 40px; font-weight: 300;
+    }
+    .hero-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+    .badge {
+      font-size: 0.78rem; font-weight: 500;
+      padding: 5px 14px; border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.6);
+      background: rgba(255,255,255,.06);
+    }
+    .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-block; text-decoration: none;
+      padding: 13px 30px; border-radius: 8px;
+      font-size: 0.95rem; font-weight: 600;
+      transition: all .2s;
+    }
+    .btn-orange { background: var(--accent); color: #fff; }
+    .btn-orange:hover { background: var(--accent-l); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(232,143,42,.35); }
+    .btn-outline {
+      border: 1px solid rgba(255,255,255,.25);
+      color: rgba(255,255,255,.75); background: transparent;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent-l); }
 
-        .page-title {
-            font-size: 2em;
-            color: #2C3E50;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #D67D3E;
-        }
+    /* ── SECTION WRAPPER ── */
+    .section-wrap { max-width: 960px; margin: 0 auto; padding: 88px 24px; }
+    .section-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--accent);
+      letter-spacing: .12em; margin-bottom: 6px;
+      display: block; font-weight: 600;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.1rem);
+      font-weight: 700; margin-bottom: 6px;
+      color: var(--navy); line-height: 1.25;
+    }
+    .section-title .point { color: var(--accent-d); }
+    .section-divider {
+      width: 48px; height: 3px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      border-radius: 2px; margin-bottom: 36px;
+    }
+    .section-body { color: var(--muted); font-size: 0.95rem; }
 
-        .section-card {
-            background: white;
-            border-radius: 12px;
-            padding: 35px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
+    /* ── BG VARIANTS ── */
+    .bg-warm  { background: var(--bg-warm); }
+    .bg-white { background: #ffffff; }
 
-        .section-title {
-            font-size: 1.3em;
-            color: #2C3E50;
-            margin-bottom: 25px;
-            font-weight: 600;
-            padding-left: 15px;
-            border-left: 4px solid #D67D3E;
-        }
+    /* ── INTRO CARD ── */
+    .intro-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 10px; padding: 32px 36px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 12px rgba(30,58,82,.06);
+    }
+    .intro-card h3 {
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--navy); margin-bottom: 12px;
+    }
+    .intro-card p { color: var(--muted); line-height: 1.85; font-size: 0.92rem; }
 
-        .form-group {
-            margin-bottom: 22px;
-        }
+    /* ── CONCEPT GRID ── */
+    .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-top: 12px; }
+    .concept-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 26px;
+      box-shadow: 0 2px 8px rgba(30,58,82,.05);
+      transition: box-shadow .2s, border-color .2s;
+    }
+    .concept-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(232,143,42,.12); }
+    .concept-card .icon {
+      width: 38px; height: 38px; border-radius: 8px;
+      background: rgba(232,143,42,.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; margin-bottom: 14px;
+    }
+    .concept-card h4 { font-size: 0.93rem; font-weight: 700; margin-bottom: 8px; color: var(--navy); }
+    .concept-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 0.9em;
-        }
+    /* ── FORMULA ── */
+    .formula-box {
+      background: var(--navy);
+      border-radius: 12px; padding: 36px;
+      text-align: center; margin: 32px 0;
+    }
+    .formula-box .formula-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.05rem; color: var(--accent-l);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(232,143,42,.3);
+      border-radius: 8px; padding: 16px 28px;
+      display: inline-block;
+    }
+    .formula-box p { color: rgba(255,255,255,.55); font-size: 0.87rem; margin-top: 14px; }
 
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1.5px solid #D4C5B0;
-            border-radius: 8px;
-            font-size: 0.95em;
-            background: white;
-            color: #333;
-            transition: all 0.25s;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23D67D3E' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 38px;
-            cursor: pointer;
-        }
+    /* ── PHENOTYPE CARDS ── */
+    .pheno-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 24px 0; }
+    .pheno-card {
+      flex: 1; min-width: 110px;
+      border-radius: 10px; padding: 16px 12px;
+      text-align: center; border: 1px solid transparent;
+    }
+    .pheno-card .abbr { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .pheno-card .name { font-size: 0.68rem; color: var(--muted); line-height: 1.4; }
+    .pheno-card.um  { background: #fef2f2; border-color: #fca5a5; } .pheno-card.um .abbr  { color: #dc2626; }
+    .pheno-card.rm  { background: #fffbeb; border-color: #fcd34d; } .pheno-card.rm .abbr  { color: #d97706; }
+    .pheno-card.nm  { background: #f0fdf4; border-color: #86efac; } .pheno-card.nm .abbr  { color: #16a34a; }
+    .pheno-card.im  { background: #fefce8; border-color: #fde047; } .pheno-card.im .abbr  { color: #ca8a04; }
+    .pheno-card.pm  { background: #f8fafc; border-color: #cbd5e1; } .pheno-card.pm .abbr  { color: #64748b; }
 
-        .form-group select:focus {
-            outline: none;
-            border-color: #D67D3E;
-            box-shadow: 0 0 0 3px rgba(214, 125, 62, 0.15);
-        }
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(30,58,82,.05); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    th {
+      background: var(--navy); color: rgba(255,255,255,.85);
+      font-size: 0.78rem; font-weight: 600;
+      padding: 12px 16px; text-align: left;
+      border-bottom: 2px solid var(--accent);
+    }
+    td {
+      padding: 11px 16px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle; background: #fff;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fdf9f4; }
+    .tag-um  { background:#fef2f2; color:#dc2626; border-radius:4px; padding:2px 8px; font-size:.75rem; font-weight:700; }
+    .tag-rm  { background:#fffbeb; color:#d97706; border-radius:4px; padding:2px 8px; font-size:.75rem; font-weight:700; }
+    .tag-nm  { background:#f0fdf4; color:#16a34a; border-radius:4px; padding:2px 8px; font-size:.75rem; font-weight:700; }
+    .tag-im  { background:#fefce8; color:#ca8a04; border-radius:4px; padding:2px 8px; font-size:.75rem; font-weight:700; }
+    .tag-pm  { background:#f8fafc; color:#64748b; border-radius:4px; padding:2px 8px; font-size:.75rem; font-weight:700; }
+    .tag-ind { background:#f1f5f9; color:#94a3b8; border-radius:4px; padding:2px 8px; font-size:.75rem; font-weight:700; }
 
-        .form-group select:disabled {
-            background-color: #F8F6F2;
-            cursor: not-allowed;
-            opacity: 0.65;
-            color: #999;
-        }
+    /* ── CPIC ── */
+    .cpic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin: 28px 0; }
+    .cpic-feat {
+      background: #fff; border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: 10px; padding: 22px;
+      box-shadow: 0 2px 8px rgba(30,58,82,.05);
+      transition: box-shadow .2s;
+    }
+    .cpic-feat:hover { box-shadow: 0 4px 16px rgba(155,99,45,.12); }
+    .cpic-feat .feat-icon { font-size: 1.4rem; margin-bottom: 10px; }
+    .cpic-feat h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; color: var(--navy); }
+    .cpic-feat p { font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
+    .cpic-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(155,99,45,.08); border: 1px solid rgba(155,99,45,.25);
+      color: var(--accent-d); text-decoration: none;
+      padding: 10px 20px; border-radius: 7px; font-size: 0.875rem; font-weight: 600;
+      margin-top: 8px; transition: all .2s;
+    }
+    .cpic-link:hover { background: rgba(155,99,45,.15); }
 
-        .allele-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+    /* ── FLOW STEPS ── */
+    .flow-steps { margin: 28px 0; display: flex; flex-direction: column; gap: 12px; }
+    .flow-step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px 24px;
+      box-shadow: 0 2px 6px rgba(30,58,82,.04);
+    }
+    .flow-step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; font-weight: 700;
+      color: #fff;
+      background: var(--navy);
+      border-radius: 7px; width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .flow-step-content h5 { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; color: var(--navy); }
+    .flow-step-content p { font-size: 0.83rem; color: var(--muted); }
 
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: #D67D3E;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.05em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s;
-            margin-top: 10px;
-        }
+    /* ── FOOTER (navy bg) ── */
+    footer {
+      background: var(--navy);
+      border-top: 2px solid var(--accent);
+      padding: 36px 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem; color: var(--accent); font-weight: 600;
+    }
+    .footer-text { font-size: 0.8rem; color: rgba(255,255,255,.45); }
 
-        .btn-primary:hover:not(:disabled) {
-            background: #C56A2A;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(214, 125, 62, 0.3);
-        }
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 20px; }
+      .section-wrap { padding: 60px 20px; }
+      .intro-card { padding: 22px 18px; }
+      footer { padding: 24px 20px; }
+    }
 
-        .btn-primary:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* 결과 섹션 */
-        .result-section {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .result-section.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .result-box {
-            background: #EDE4D3;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 25px;
-        }
-
-        .result-box h3 {
-            font-size: 1.2em;
-            color: #2C3E50;
-            margin-bottom: 25px;
-            font-weight: 600;
-            padding-left: 15px;
-            border-left: 4px solid #D67D3E;
-        }
-
-        .phenotype-card {
-            background: #2C3E50;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-
-        .phenotype-label {
-            font-size: 0.8em;
-            color: #95A5A6;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .phenotype-value {
-            font-size: 1.8em;
-            color: #D67D3E;
-            font-weight: 700;
-        }
-
-        .implication-label {
-            font-size: 0.8em;
-            color: #666;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .implication-box {
-            background: #F5F1E8;
-            border-left: 4px solid #D67D3E;
-            padding: 18px;
-            border-radius: 8px;
-            font-size: 0.95em;
-            color: #555;
-            line-height: 1.7;
-        }
-
-        .freq-section {
-            background: #EDE4D3;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 25px;
-        }
-
-        .freq-section h3 {
-            font-size: 1.2em;
-            color: #2C3E50;
-            margin-bottom: 25px;
-            font-weight: 600;
-            padding-left: 15px;
-            border-left: 4px solid #D67D3E;
-        }
-
-        .freq-charts {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-        }
-
-        .chart-container {
-            text-align: center;
-        }
-
-        .chart-label-text {
-            font-size: 0.9em;
-            color: #2C3E50;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .circular-chart {
-            width: 180px;
-            height: 180px;
-            margin: 0 auto 15px;
-            position: relative;
-        }
-
-        .circular-chart svg {
-            transform: rotate(-90deg);
-        }
-
-        .circle-bg {
-            fill: none;
-            stroke: #E8E0D0;
-            stroke-width: 15;
-        }
-
-        .circle-progress {
-            fill: none;
-            stroke-width: 15;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 1s ease;
-        }
-
-        .chart-percent {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.8em;
-            font-weight: 700;
-        }
-
-        .chart-legend {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.85em;
-            color: #555;
-        }
-
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        /* 약물 테이블 */
-        .drug-section {
-            background: white;
-            border-radius: 12px;
-            padding: 35px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .drug-section h3 {
-            font-size: 1.3em;
-            color: #2C3E50;
-            margin-bottom: 25px;
-            font-weight: 600;
-            padding-left: 15px;
-            border-left: 4px solid #D67D3E;
-        }
-
-        .drug-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .drug-table thead {
-            background: linear-gradient(135deg, #D67D3E 0%, #E8935E 100%);
-        }
-
-        .drug-table th {
-            color: white;
-            padding: 15px 20px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-
-        .drug-table th:first-child {
-            border-top-left-radius: 8px;
-        }
-
-        .drug-table th:last-child {
-            border-top-right-radius: 8px;
-        }
-
-        .drug-table tbody tr {
-            border-bottom: 1px solid #E8E0D0;
-        }
-
-        .drug-table tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        .drug-table td {
-            padding: 18px 20px;
-            font-size: 0.95em;
-            color: #333;
-        }
-
-        .drug-table .ingredient-name {
-            font-weight: 600;
-            color: #2C3E50;
-        }
-
-        .drug-table .korean-drugs {
-            color: #555;
-            line-height: 1.6;
-        }
-
-        .more-link {
-            color: #D67D3E;
-            text-decoration: none;
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
-        .more-link:hover {
-            text-decoration: underline;
-        }
-
-        .more-btn-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .more-btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: white;
-            color: #D67D3E;
-            border: 2px solid #D67D3E;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s;
-            text-decoration: none;
-        }
-
-        .more-btn:hover {
-            background: #D67D3E;
-            color: white;
-        }
-
-        .error {
-            background: #FEE;
-            color: #C33;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #C33;
-            font-size: 0.9em;
-        }
-
-        @media (max-width: 768px) {
-            .freq-charts {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            .allele-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    /* ── SUB SECTION TITLE ── */
+    .sub-title {
+      font-size: 1rem; font-weight: 700;
+      color: var(--accent-d); margin: 36px 0 14px;
+      padding-left: 12px;
+      border-left: 3px solid var(--accent);
+    }
+    .note { font-size: 0.8rem; color: var(--light); margin-bottom: 14px; }
+  </style>
 </head>
 <body>
-    <div class="header-bar">
-        <div class="logo">
-            <span class="orange">CYP</span><span>.0R1</span>
-        </div>
-        <div class="tag">#PHARMACOGENOMICS</div>
+
+<!-- ── NAVIGATION ── -->
+<nav>
+  <a href="#hero" class="nav-logo">CYP<span>.</span>0R1</a>
+  <div class="nav-links">
+    <a href="#intro" class="active">소개 및 핵심개념</a>
+    <a href="#cpic">CPIC 가이드라인</a>
+    <a href="index.html" class="btn-primary">약물 예측 →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-tag">PHARMACOGENOMICS</div>
+  <h1><span class="cyp">CYP</span><span class="dot">.</span><span class="or1">0R1</span></h1>
+  <p class="hero-sub">유전형 기반 약물 반응 예측 플랫폼 — CPIC 표준 가이드라인을 기반으로 개인 맞춤형 정밀 의료를 제공합니다.</p>
+  <div class="hero-badges">
+    <span class="badge">CYP2D6</span>
+    <span class="badge">CYP2C19</span>
+    <span class="badge">CYP2B6</span>
+    <span class="badge">CPIC Guidelines</span>
+    <span class="badge">Diplotype → Phenotype</span>
+  </div>
+  <div class="hero-cta">
+    <a href="#intro" class="btn btn-orange">플랫폼 소개 보기</a>
+    <a href="index.html" class="btn btn-outline">약물 예측 시작하기</a>
+  </div>
+</section>
+
+<!-- ── SECTION 01 ── -->
+<section id="intro" class="bg-white">
+  <div class="section-wrap">
+    <span class="section-num">// 01</span>
+    <h2 class="section-title">CYP.0R1 <span class="point">소개</span></h2>
+    <div class="section-divider"></div>
+    <div class="intro-card">
+      <h3>CYP.0R1이란?</h3>
+      <p>
+        저희 개발 팀은 <strong style="color:var(--navy)">약물유전체 기반 환자의 유전형별 맞춤형 치료</strong>를 위해 프로젝트 CYP.0R1 개발을 진행했습니다.<br><br>
+        CYP2C19과 CYP2D6는 약물 대사의 핵심을 담당하는 효소군으로, 사람마다 같은 약이 다르게 작용하는 이유가 이 유전자에 있습니다. 본 프로젝트의 핵심 타겟인 이 효소군인 CYP450에서 <strong style="color:var(--accent)">'CYP'</strong>를 따왔습니다.<br><br>
+        또한, 유전자를 다루는 도구에서 영감을 받아 팀명 '오리조'를 유전자 명명법으로 재해석하여 <strong style="color:var(--accent)">'0R1'</strong>를 만들었습니다. 이 둘을 합쳐 <strong style="color:var(--navy)">CYP.0R1</strong> — 환자의 유전형을 읽고 그 사람에게 맞는 치료를 찾는 정밀함을 이름에 담았습니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 02 ── -->
+<section id="basics" class="bg-warm">
+  <div class="section-wrap">
+    <span class="section-num">// 02</span>
+    <h2 class="section-title">약물유전체 <span class="point">기초 정의</span></h2>
+    <div class="section-divider"></div>
+    <div class="intro-card">
+      <h3>Pharmacogenetics</h3>
+      <p>
+        Pharmacogenetics(약물유전체학)는 <strong style="color:var(--navy)">개인의 유전적 특성이 약물의 대사, 효능, 부작용에 어떤 영향을 미치는지</strong>를 연구하는 학문입니다.<br><br>
+        같은 약을 같은 용량으로 복용해도 사람마다 효과가 다른 이유는 유전자에 있습니다. 특히 <strong style="color:var(--accent)">CYP450(Cytochrome P450)</strong> 효소군은 체내에서 약물을 대사하는 핵심 효소로, 이 효소를 암호화하는 유전자의 변이에 따라 약물 대사 속도가 크게 달라집니다. 본 프로젝트에서는 <strong style="color:var(--navy)">CYP2D6, CYP2C19</strong>와 같은 주요 CYP450 유전자를 중심으로 데이터베이스를 구축하였습니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 03 ── -->
+<section id="concepts" class="bg-white">
+  <div class="section-wrap">
+    <span class="section-num">// 03</span>
+    <h2 class="section-title"><span class="point">핵심</span> 개념</h2>
+    <div class="section-divider"></div>
+    <p class="section-body" style="margin-bottom:28px;">유전체 데이터를 분석하고 알고리즘을 설계하기 위해 명확한 유전학적 단위 표준화가 필요합니다.</p>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">🧬</div>
+        <h4>대립유전자 (Allele)</h4>
+        <p>하나의 유전자는 위치(locus)에 따라 다양한 형태로 존재할 수 있으며, 이 각각의 형태를 allele이라고 합니다. 예를 들어 CYP2D6 유전자는 *1, *2, *4, *10 등 수십 가지의 allele을 가지며, 어떤 allele을 보유하느냐에 따라 효소의 활성도가 달라집니다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔬</div>
+        <h4>유전자형 (Genotype)</h4>
+        <p>개인이 실제로 보유한 유전자 구성을 의미합니다. 사람은 각 유전자를 부모로부터 하나씩 물려받아 두 개의 allele 쌍으로 이루어진 genotype을 가집니다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">⚗️</div>
+        <h4>표현형 (Phenotype)</h4>
+        <p>유전자형(Genotype)으로부터 예측되는 실제 기능적 특성을 의미합니다. 약물유전체학에서는 특정 유전자형이 해당 효소의 활성도를 어느 정도로 나타내는지를 phenotype으로 표현합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 04/05 ── -->
+<section id="scoring" class="bg-warm">
+  <div class="section-wrap">
+    <span class="section-num">// 04 — 05</span>
+    <h2 class="section-title">표현형 변환 및 <span class="point">스코어링 시스템</span></h2>
+    <div class="section-divider"></div>
+    <p class="section-body" style="margin-bottom:20px;">Activity Score는 개인이 보유한 두 allele 각각의 기능적 활성도를 수치화하여 합산한 값입니다. 각 allele은 기능 수준에 따라 일정한 점수(0, 0.5, 1 등)가 부여되며, 두 allele의 점수를 더한 총합으로 해당 개인의 효소 활성도를 정량적으로 나타냅니다.</p>
+
+    <div class="formula-box">
+      <div class="formula-text">Activity Score (AS) = Value<sub>Allele1</sub> + Value<sub>Allele2</sub></div>
+      <p>계산된 AS 값에 따라 최종 Phenotype이 분류됩니다.</p>
     </div>
 
-    <div class="container">
-        <h1 class="page-title">CYP.0R1</h1>
-
-        <!-- 입력 섹션 -->
-        <div class="section-card">
-            <h2 class="section-title">유전형 분석</h2>
-
-            <div class="form-group">
-                <label for="geneSelect">유전자</label>
-                <select id="geneSelect">
-                    <option value="">값을 선택하세요</option>
-                </select>
-            </div>
-
-            <div class="allele-row">
-                <div class="form-group">
-                    <label for="allele1Select">대립 유전자 1</label>
-                    <select id="allele1Select" disabled>
-                        <option value="">유전자를 먼저 선택하세요</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="allele2Select">대립 유전자 2</label>
-                    <select id="allele2Select" disabled>
-                        <option value="">유전자를 먼저 선택하세요</option>
-                    </select>
-                </div>
-            </div>
-
-            <button id="confirmBtn" class="btn-primary" disabled>확인</button>
-        </div>
-
-        <!-- 결과 섹션 -->
-        <div id="resultSection" class="result-section">
-            <div id="errorMsg" class="error" style="display:none;"></div>
-
-            <div class="result-box">
-                <h3>결과</h3>
-
-                <div class="phenotype-card">
-                    <div class="phenotype-label">PHENOTYPE</div>
-                    <div class="phenotype-value" id="phenotypeName">-</div>
-                </div>
-
-                <div class="implication-label">IMPLICATION</div>
-                <div class="implication-box" id="implication">-</div>
-            </div>
-
-            <div class="freq-section">
-                <h3>비율을 확인해보세요!</h3>
-
-                <div class="freq-charts">
-                    <div class="chart-container">
-                        <div class="chart-label-text">동아시아 빈도</div>
-                        <div class="circular-chart">
-                            <svg viewBox="0 0 180 180">
-                                <circle class="circle-bg" cx="90" cy="90" r="70"></circle>
-                                <circle id="eastAsianCircle" class="circle-progress" cx="90" cy="90" r="70" 
-                                        stroke="#D67D3E" stroke-dasharray="439.6" stroke-dashoffset="439.6"></circle>
-                            </svg>
-                            <div class="chart-percent" id="eastAsianLabel" style="color: #D67D3E;">-%</div>
-                        </div>
-                        <div class="chart-legend">
-                            <span class="legend-dot" style="background: #D67D3E;"></span>
-                            <span>동아시아 빈도</span>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <div class="chart-label-text">유럽 빈도</div>
-                        <div class="circular-chart">
-                            <svg viewBox="0 0 180 180">
-                                <circle class="circle-bg" cx="90" cy="90" r="70"></circle>
-                                <circle id="europeanCircle" class="circle-progress" cx="90" cy="90" r="70" 
-                                        stroke="#2C3E50" stroke-dasharray="439.6" stroke-dashoffset="439.6"></circle>
-                            </svg>
-                            <div class="chart-percent" id="europeanLabel" style="color: #2C3E50;">-%</div>
-                        </div>
-                        <div class="chart-legend">
-                            <span class="legend-dot" style="background: #2C3E50;"></span>
-                            <span>유럽 빈도</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="drug-section">
-                <h3>관련 약물</h3>
-                <div id="drugTableContainer"></div>
-                <div class="more-btn-container">
-                    <a id="moreBtn" href="#" target="_blank" class="more-btn" style="display:none;">+ 더보기</a>
-                </div>
-            </div>
-        </div>
+    <div class="sub-title">최종 표현형(Phenotype) 5대 분류</div>
+    <p class="note">※ CYP2D6의 경우, RM은 UM으로 대체하여 표현합니다.</p>
+    <div class="pheno-row">
+      <div class="pheno-card um"><div class="abbr">UM</div><div class="name">Ultrarapid Metabolizer</div></div>
+      <div class="pheno-card rm"><div class="abbr">RM</div><div class="name">Rapid Metabolizer</div></div>
+      <div class="pheno-card nm"><div class="abbr">NM</div><div class="name">Normal Metabolizer</div></div>
+      <div class="pheno-card im"><div class="abbr">IM</div><div class="name">Intermediate Metabolizer</div></div>
+      <div class="pheno-card pm"><div class="abbr">PM</div><div class="name">Poor Metabolizer</div></div>
     </div>
 
-    <script>
-        const API_BASE = 'https://cyp0r1.onrender.com';
-        let currentGeneSymbol = '';
+    <div class="sub-title">CYP2D6 Diplotype → Phenotype 분류표</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Phenotype</th><th>Activity Score</th><th>Diplotype 예시</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag-um">UM</span> Ultrarapid Metabolizer</td><td>&gt; 2.25</td><td>*1/*1xN, *1/*2xN, *2/*2xN</td></tr>
+          <tr><td><span class="tag-nm">NM</span> Normal Metabolizer</td><td>1.25 ≤ x ≤ 2.25</td><td>*1/*10, *1/*1, *1/*2, *2x2/*10</td></tr>
+          <tr><td><span class="tag-im">IM</span> Intermediate Metabolizer</td><td>0 &lt; x &lt; 1.25</td><td>*4/*10, *10/*10, *1/*5, *1/*4</td></tr>
+          <tr><td><span class="tag-pm">PM</span> Poor Metabolizer</td><td>0</td><td>*3/*4, *4/*4, *5/*5, *5/*6</td></tr>
+          <tr><td><span class="tag-ind">Indeterminate</span></td><td>n/a</td><td>*1/*22, *1/*25, *22/*25</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-        window.addEventListener('DOMContentLoaded', loadGenes);
+    <div class="sub-title">CYP2C19 Diplotype → Phenotype 분류표</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Phenotype</th><th>조건</th><th>Diplotype 예시</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag-um">UM</span> Ultrarapid Metabolizer</td><td>Two increased function alleles</td><td>*17/*17</td></tr>
+          <tr><td><span class="tag-rm">RM</span> Rapid Metabolizer</td><td>One normal + one increased function</td><td>*1/*17</td></tr>
+          <tr><td><span class="tag-nm">NM</span> Normal Metabolizer</td><td>Two normal function alleles</td><td>*1/*1</td></tr>
+          <tr><td><span class="tag-im">IM</span> Likely Intermediate</td><td>One normal + one decreased function</td><td>*1/*9, *9/*17, *9/*9</td></tr>
+          <tr><td><span class="tag-im">IM</span> Intermediate Metabolizer</td><td>One normal + one no function</td><td>*1/*2, *1/*3, *2/*17</td></tr>
+          <tr><td><span class="tag-pm">PM</span> Likely Poor Metabolizer</td><td>One decreased + one no function</td><td>*2/*9, *3/*9</td></tr>
+          <tr><td><span class="tag-pm">PM</span> Poor Metabolizer</td><td>Two no function alleles</td><td>*2/*2, *3/*3, *2/*3</td></tr>
+          <tr><td><span class="tag-ind">Indeterminate</span></td><td>Uncertain function allele(s)</td><td>*1/*12, *2/*12</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
-        async function loadGenes() {
-            try {
-                const response = await fetch(`${API_BASE}/genes`);
-                const genes = await response.json();
+<!-- ── SECTION 06: CPIC ── -->
+<section id="cpic" class="bg-white">
+  <div class="section-wrap">
+    <span class="section-num">// 06</span>
+    <h2 class="section-title">글로벌 표준 <span class="point">CPIC 가이드라인</span> 연계</h2>
+    <div class="section-divider"></div>
 
-                const geneSelect = document.getElementById('geneSelect');
-                genes.forEach(gene => {
-                    const option = document.createElement('option');
-                    option.value = gene.gene_symbol;
-                    option.textContent = gene.gene_symbol;
-                    geneSelect.appendChild(option);
-                });
+    <div class="intro-card" style="margin-bottom:32px;">
+      <h3>CPIC(임상약물유전체학 구현 컨소시엄) 가이드라인이란?</h3>
+      <p>
+        CPIC(Clinical Pharmacogenetics Implementation Consortium)은 전 세계의 유전체 연구 증거를 기반으로 <strong style="color:var(--navy)">'환자의 유전자 검사 결과가 나왔을 때, 의사가 처방을 어떻게 변경해야 하는가?'</strong>에 대한 구체적이고 동기화된 가이드라인을 제공하는 국제 표준 기구입니다.<br><br>
+        <a href="https://cpicpgx.org" target="_blank" class="cpic-link">🌐 공식 웹사이트: cpicpgx.org</a>
+      </p>
+    </div>
 
-                geneSelect.addEventListener('change', handleGeneChange);
-            } catch (error) {
-                console.error('유전자 목록 로딩 실패:', error);
-                alert('유전자 목록을 불러오는데 실패했습니다.');
-            }
+    <div class="sub-title">CPIC이 제공하는 4가지 핵심 정보</div>
+    <div class="cpic-grid">
+      <div class="cpic-feat">
+        <div class="feat-icon">📋</div>
+        <h4>Allele 정의 및 기능적 분류 표준화</h4>
+        <p>각 유전자의 allele별 기능 수준을 국제 기준에 따라 분류하고 표준화합니다.</p>
+      </div>
+      <div class="cpic-feat">
+        <div class="feat-icon">🔄</div>
+        <h4>유전자형 → 표현형 변환 기준 제공</h4>
+        <p>Diplotype 기반의 phenotype 분류 알고리즘과 activity score 계산 기준을 제공합니다.</p>
+      </div>
+      <div class="cpic-feat">
+        <div class="feat-icon">💊</div>
+        <h4>임상 약물 처방 권고사항 발표</h4>
+        <p>표현형에 따른 약물 용량 조정 및 대체 약물 처방 가이드를 제시합니다.</p>
+      </div>
+      <div class="cpic-feat">
+        <div class="feat-icon">🌏</div>
+        <h4>인종별 Allele Frequency 데이터</h4>
+        <p>동아시아인을 포함한 인종별 대립유전자 빈도 데이터를 수집·제공합니다.</p>
+      </div>
+    </div>
+
+    <div class="sub-title" style="margin-top:40px;">왜 CPIC 가이드라인으로 데이터베이스를 구성했는가?</div>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">✅</div>
+        <h4>표준화된 분류 체계</h4>
+        <p>CPIC은 각 유전자의 allele별 activity score, phenotype 분류 기준을 국제적으로 표준화하여 일관성과 신뢰성을 충족하는 데이터를 제공합니다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">📊</div>
+        <h4>인종별 Allele Frequency</h4>
+        <p>인종별 대립유전자 빈도 테이블을 함께 제공하므로 한국인을 포함한 동아시아인 특이적 위험인자 스크리닝이 가능합니다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔬</div>
+        <h4>임상적 근거 기반</h4>
+        <p>CPIC은 peer-reviewed 연구를 바탕으로 작성되며 지속적으로 업데이트됩니다. 검증된 데이터를 사용하여 프로젝트의 신뢰도를 높일 수 있었습니다.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">🔓</div>
+        <h4>공개 접근 가능한 데이터</h4>
+        <p>CPIC의 모든 가이드라인과 데이터는 무료로 공개되어 있어, 학술 및 교육 목적의 프로젝트에 적합하게 활용할 수 있었습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 07 ── -->
+<section id="architecture" class="bg-warm">
+  <div class="section-wrap">
+    <span class="section-num">// 07</span>
+    <h2 class="section-title">CYP.OR1 <span class="point">실제 구현 모델</span></h2>
+    <div class="section-divider"></div>
+    <p class="section-body" style="margin-bottom:28px;">저희 개발 팀은 CPIC guideline 및 데이터를 전처리하여 데이터베이스 구조를 설계했습니다.</p>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-step-num">01</div>
+        <div class="flow-step-content">
+          <h5>CPIC Allele Definition Table 데이터 가공 및 적재</h5>
+          <p>CPIC 공식 가이드라인에서 제공하는 allele 정의 테이블을 전처리하여 데이터베이스에 구조화된 형태로 적재합니다.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">02</div>
+        <div class="flow-step-content">
+          <h5>Activity Score 계산 모듈</h5>
+          <p>환자 유전형 입력 시 알고리즘 기반 Activity Score 계산 모듈이 작동하여 두 allele의 기능 점수를 합산합니다.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">03</div>
+        <div class="flow-step-content">
+          <h5>Diplotype-to-Phenotype Mapping</h5>
+          <p>Diplotype-to-Phenotype Mapping Tables를 거쳐 최종 대사 표현형(UM / RM / NM / IM / PM)이 확정됩니다.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">04</div>
+        <div class="flow-step-content">
+          <h5>인종별 빈도 시각화</h5>
+          <p>CPIC Frequency Data와 결합하여 환자가 속한 인종(예: 동아시아인) 내 대사 취약성 통계를 화면에 시각화합니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:52px;">
+      <p style="color:var(--muted); margin-bottom:18px; font-size:0.95rem;">직접 유전형을 입력하고 약물 반응을 예측해보세요</p>
+      <a href="index.html" class="btn btn-orange" style="font-size:1rem; padding:15px 40px;">약물 예측 시작하기 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">CYP.0R1</div>
+  <div class="footer-text">© 2026 CYP.OR1 Capstone Design Project. Powered by CPIC Standard Guidelines.</div>
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const id = entry.target.id;
+        if (['hero','intro','basics','concepts','scoring'].includes(id)) {
+          document.querySelector('.nav-links a[href="#intro"]')?.classList.add('active');
+        } else if (id === 'cpic' || id === 'architecture') {
+          document.querySelector('.nav-links a[href="#cpic"]')?.classList.add('active');
         }
+      }
+    });
+  }, { rootMargin: '-35% 0px -55% 0px' });
 
-        async function handleGeneChange(e) {
-            const geneSymbol = e.target.value;
-            currentGeneSymbol = geneSymbol;
+  sections.forEach(s => observer.observe(s));
+</script>
 
-            const allele1Select = document.getElementById('allele1Select');
-            const allele2Select = document.getElementById('allele2Select');
-            const confirmBtn = document.getElementById('confirmBtn');
-
-            if (!geneSymbol) {
-                allele1Select.disabled = true;
-                allele2Select.disabled = true;
-                confirmBtn.disabled = true;
-                allele1Select.innerHTML = '<option value="">유전자를 먼저 선택하세요</option>';
-                allele2Select.innerHTML = '<option value="">유전자를 먼저 선택하세요</option>';
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/genes/${geneSymbol}/alleles`);
-                const alleles = await response.json();
-
-                allele1Select.innerHTML = '<option value="">선택하세요</option>';
-                allele2Select.innerHTML = '<option value="">선택하세요</option>';
-
-                // ✅ Backend에서 이미 정렬되어 오므로 그대로 사용
-                alleles.forEach(allele => {
-                    const option1 = document.createElement('option');
-                    option1.value = allele.allele_name;
-                    option1.textContent = allele.allele_name;
-                    allele1Select.appendChild(option1);
-
-                    const option2 = document.createElement('option');
-                    option2.value = allele.allele_name;
-                    option2.textContent = allele.allele_name;
-                    allele2Select.appendChild(option2);
-                });
-
-                allele1Select.disabled = false;
-                allele2Select.disabled = false;
-
-                allele1Select.addEventListener('change', checkFormComplete);
-                allele2Select.addEventListener('change', checkFormComplete);
-            } catch (error) {
-                console.error('Allele 목록 로딩 실패:', error);
-                alert('Allele 목록을 불러오는데 실패했습니다.');
-            }
-        }
-
-        function checkFormComplete() {
-            const allele1 = document.getElementById('allele1Select').value;
-            const allele2 = document.getElementById('allele2Select').value;
-            const confirmBtn = document.getElementById('confirmBtn');
-
-            confirmBtn.disabled = !(allele1 && allele2);
-        }
-
-        document.getElementById('confirmBtn').addEventListener('click', analyzePhenotype);
-
-        async function analyzePhenotype() {
-            const geneSymbol = document.getElementById('geneSelect').value;
-            const allele1 = document.getElementById('allele1Select').value;
-            const allele2 = document.getElementById('allele2Select').value;
-
-            const confirmBtn = document.getElementById('confirmBtn');
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = '분석 중...';
-
-            try {
-                const phenoResponse = await fetch(`${API_BASE}/phenotype/calculate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        gene_symbol: geneSymbol,
-                        allele1: allele1,
-                        allele2: allele2
-                    })
-                });
-
-                if (!phenoResponse.ok) {
-                    const errorData = await phenoResponse.json();
-                    throw new Error(errorData.detail || 'Phenotype 분석 실패');
-                }
-
-                const phenoData = await phenoResponse.json();
-
-                const drugResponse = await fetch(`${API_BASE}/genes/${geneSymbol}/top-ingredients`);
-                const drugData = await drugResponse.json();
-
-                displayResults(phenoData, drugData);
-
-            } catch (error) {
-                console.error('분석 실패:', error);
-                document.getElementById('errorMsg').textContent = '분석 중 오류가 발생했습니다: ' + error.message;
-                document.getElementById('errorMsg').style.display = 'block';
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = '확인';
-            }
-        }
-
-        function displayResults(phenoData, drugData) {
-            document.getElementById('resultSection').classList.add('active');
-            document.getElementById('errorMsg').style.display = 'none';
-
-            document.getElementById('phenotypeName').textContent = phenoData.phenotype || '-';
-            document.getElementById('implication').textContent = phenoData.pheno_implication || '-';
-
-            const eastasianFreq = parseFloat(phenoData.eastasian_freq) || 0;
-            const europeanFreq = parseFloat(phenoData.european_freq) || 0;
-
-            updateCircularChart('eastAsianCircle', 'eastAsianLabel', eastasianFreq);
-            updateCircularChart('europeanCircle', 'europeanLabel', europeanFreq);
-
-            displayDrugTable(drugData);
-
-            document.getElementById('confirmBtn').disabled = false;
-            document.getElementById('confirmBtn').textContent = '확인';
-
-            setTimeout(() => {
-                document.getElementById('resultSection').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                });
-            }, 200);
-        }
-
-        function updateCircularChart(circleId, labelId, percentage) {
-            const circle = document.getElementById(circleId);
-            const label = document.getElementById(labelId);
-
-            const circumference = 439.6;
-            const offset = circumference - (circumference * percentage / 100);
-
-            setTimeout(() => {
-                circle.style.strokeDashoffset = offset;
-                label.textContent = percentage.toFixed(1) + '%';
-            }, 100);
-        }
-
-        function displayDrugTable(data) {
-            const container = document.getElementById('drugTableContainer');
-            const moreBtn = document.getElementById('moreBtn');
-
-            let drugs = [];
-            let geneUrl = null;
-
-            // ✅ 새 API 응답 구조 처리
-            if (data.ingredients) {
-                drugs = data.ingredients;
-                geneUrl = data.gene_url;
-            } else if (Array.isArray(data)) {
-                // ✅ 기존 API 응답 구조 호환
-                drugs = data;
-            }
-
-            if (!drugs || drugs.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#999;">관련 약물 정보가 없습니다.</p>';
-                moreBtn.style.display = 'none';
-                return;
-            }
-
-            let tableHTML = `
-                <table class="drug-table">
-                    <thead>
-                        <tr>
-                            <th>성분명</th>
-                            <th>국내 의약품</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            drugs.forEach(drug => {
-                const moreLink = drug.drug_url ? 
-                    `<a href="${drug.drug_url}" target="_blank" class="more-link">+ 더보기</a>` : '';
-
-                const koreanDrugs = drug.korean_drugs || '정보 없음';
-
-                tableHTML += `
-                    <tr>
-                        <td class="ingredient-name">${drug.ingredient || '-'}</td>
-                        <td class="korean-drugs">${koreanDrugs}${moreLink}</td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
-
-            // ✅ gene_url이 있으면 더보기 버튼 표시
-            if (geneUrl) {
-                moreBtn.href = geneUrl;
-                moreBtn.style.display = 'inline-block';
-            } else {
-                moreBtn.style.display = 'none';
-            }
-        }
-    </script>
 </body>
 </html>
